@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      title: '嘻哈管理后台',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      title: '嘻哈管理管理后台',
+      logo: process.env.VUE_APP_BASE_PATH + process.env.VUE_APP_BASE_FILE + 'img/logo.png'
     }
   }
 }

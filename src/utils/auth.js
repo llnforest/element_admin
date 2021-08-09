@@ -16,7 +16,7 @@ export function removeToken() {
 }
 
 export function getSetting(key) {
-  return Cookies.set(SettingKey + key)
+  return Cookies.get(SettingKey + key)
 }
 
 export function setSetting(key, set) {

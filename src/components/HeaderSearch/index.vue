@@ -53,7 +53,6 @@ export default {
       this.searchPool = this.generateRoutes(this.routes)
     },
     searchPool(list) {
-      console.log(list)
       // Support pinyin search
       if (this.lang === 'zh' && this.supportPinyinSearch) {
         this.addPinyinField(list)
@@ -69,7 +68,6 @@ export default {
     }
   },
   mounted() {
-    console.log(this.routes)
     this.searchPool = this.generateRoutes(this.routes)
   },
   methods: {
@@ -121,11 +119,11 @@ export default {
           name: 'title',
           weight: 0.7
         }, {
-          name: 'pinyinTitle',
-          weight: 0.3
+          name: 'pinyin',
+          weight: 0.2
         }, {
           name: 'path',
-          weight: 0.3
+          weight: 0.1
         }]
       })
     },

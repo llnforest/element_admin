@@ -3,13 +3,14 @@ import variables from '@/styles/element-variables.scss'
 import { getSetting } from '@/utils/auth'
 
 const getDefaultState = () => {
+  console.log(getSetting('tagsView') || 0)
   return {
-    theme: getSetting('theme') ? getSetting('theme') : variables.theme,
-    showSettings: getSetting('showSettings') ? getSetting('showSettings') : true,
-    fixedHeader: getSetting('fixedHeader') ? getSetting('fixedHeader') : true,
-    sidebarLogo: getSetting('sidebarLogo') ? getSetting('sidebarLogo') : true,
-    tagsView: getSetting('tagsView') ? getSetting('tagsView') : true,
-    supportPinyinSearch: getSetting('supportPinyinSearch') ? getSetting('supportPinyinSearch') : true
+    theme: variables.theme,
+    showSettings: 1,
+    fixedHeader: 1,
+    sidebarLogo: 1,
+    tagsView: 1,
+    supportPinyinSearch: 1
   }
 }
 

@@ -10,22 +10,22 @@
 
       <div class="drawer-item">
         <span>标签栏</span>
-        <el-switch v-model="tagsView" class="drawer-switch" :active-value="1" :inactive-value="0" />
+        <el-switch v-model="tagsView" class="drawer-switch" :active-color="theme" :active-value="1" :inactive-value="0" />
       </div>
 
       <div class="drawer-item">
         <span>固定头</span>
-        <el-switch v-model="fixedHeader" class="drawer-switch" :active-value="1" :inactive-value="0"/>
+        <el-switch v-model="fixedHeader" class="drawer-switch" :active-color="theme" :active-value="1" :inactive-value="0"/>
       </div>
 
       <div class="drawer-item">
         <span>侧边logo</span>
-        <el-switch v-model="sidebarLogo" class="drawer-switch" :active-value="1" :inactive-value="0"/>
+        <el-switch v-model="sidebarLogo" class="drawer-switch" :active-color="theme" :active-value="1" :inactive-value="0"/>
       </div>
 
       <div v-if="lang === 'zh'" class="drawer-item">
         <span>菜单支持拼音搜索</span>
-        <el-switch v-model="supportPinyinSearch" class="drawer-switch" :active-value="1" :inactive-value="0"/>
+        <el-switch v-model="supportPinyinSearch" class="drawer-switch" :active-color="theme" :active-value="1" :inactive-value="0"/>
       </div>
 
     </div>
@@ -40,11 +40,16 @@ export default {
     return {}
   },
   computed: {
+    theme() {
+      return this.$store.state.settings.theme
+    },
     fixedHeader: {
       get() {
+        console.log('getfixedHeader',this.$store.state.settings.fixedHeader)
         return this.$store.state.settings.fixedHeader
       },
       set(val) {
+        console.log('setfixedHeader',val);
         this.$store.dispatch('settings/changeSetting', {
           key: 'fixedHeader',
           value: val
@@ -53,9 +58,11 @@ export default {
     },
     tagsView: {
       get() {
+        console.log('gettagsView',this.$store.state.settings.tagsView)
         return this.$store.state.settings.tagsView
       },
       set(val) {
+        console.log('settagsView',val);
         this.$store.dispatch('settings/changeSetting', {
           key: 'tagsView',
           value: val

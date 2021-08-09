@@ -51,24 +51,25 @@ const actions = {
         const { data } = response
 
         if (!data) {
-          return reject('Verification failed, please Login again.')
+          return reject('验证失败，请重新登录！')
         }
-
-        const { nickname, avatar, showSettings, fixedHeader, sidebarLogo, tagsView, supportPinyinSearch, theme } = data
-        setSetting('theme', theme)
-        setSetting('showSettings', showSettings)
-        setSetting('fixedHeader', fixedHeader)
-        setSetting('sidebarLogo', sidebarLogo)
-        setSetting('tagsView', tagsView)
-        setSetting('supportPinyinSearch', supportPinyinSearch)
+        const { setting, nickname, avatar } = data
+        const { show_settings, fixed_header, sidebar_logo, tags_view, pinyin_search, theme } = setting
+        // console.log(show_settings)
+        // setSetting('theme', theme)
+        // setSetting('showSettings', show_settings)
+        // setSetting('fixedHeader', fixed_header)
+        // setSetting('sidebarLogo', sidebar_logo)
+        // setSetting('tagsView', tags_view)
+        // setSetting('supportPinyinSearch', pinyin_search)
         store.dispatch('settings/changeSetting', { key: 'theme', value: theme })
-        store.dispatch('settings/changeSetting', { key: 'showSettings', value: showSettings })
-        store.dispatch('settings/changeSetting', { key: 'fixedHeader', value: fixedHeader })
-        store.dispatch('settings/changeSetting', { key: 'sidebarLogo', value: sidebarLogo })
-        store.dispatch('settings/changeSetting', { key: 'tagsView', value: tagsView })
-        store.dispatch('settings/changeSetting', { key: 'supportPinyinSearch', value: supportPinyinSearch })
+        store.dispatch('settings/changeSetting', { key: 'showSettings', value: show_settings })
+        store.dispatch('settings/changeSetting', { key: 'fixedHeader', value: fixed_header })
+        store.dispatch('settings/changeSetting', { key: 'sidebarLogo', value: sidebar_logo })
+        store.dispatch('settings/changeSetting', { key: 'tagsView', value: tags_view })
+        store.dispatch('settings/changeSetting', { key: 'supportPinyinSearch', value: pinyin_search })
         commit('SET_NAME', nickname)
-        commit('SET_AVATAR', avatar)
+        commit('SET_AVATAR', avatar || process.env.VUE_APP_BASE_PATH + process.env.VUE_APP_BASE_FILE + 'img/admin_icon.gif')
         resolve(data)
       }).catch(error => {
         reject(error)
