@@ -1,6 +1,9 @@
+<script src="../../../layout/components/Sidebar/FixiOSBug.js"></script>
 <template>
+
   <div class="tree_grid" ref="tree_grid">
     <div class="table-wrapper">
+
       <!--表格-->
       <el-table
         :border="border"
@@ -22,38 +25,38 @@
         @row-dblclick="handleRowDblclick"
         @selection-change="handleSelectionChange"
         @sort-change="sortChange"
+        v-loading="loading"
+        element-loading-text="拼命加载中"
         class="table"
         header-row-class-name="table_header"
         ref="table"
         size="medium"
-        v-loading="loading"
       >
         <!--左侧序号等列-->
-        <!--序号-->
+        <!--是否多选-->
+        <el-table-column
+          align="center"
+          header-align="center"
+          :resizable="resizable"
+          type="selection"
+          v-if="type.multi && data"
+          width="55"
+        >
+        </el-table-column>
+        <!--左侧序号等列-->
         <el-table-column
           :align="align"
           :header-align="headerAlign"
           :resizable="resizable"
           label="序号"
           type="index"
-          v-if="type.index && data && data.length"
+          v-if="type.index && data"
           width="70"
         >
         </el-table-column>
-        <!--是否多选-->
-        <el-table-column
-          :align="align"
-          :header-align="headerAlign"
-          :resizable="resizable"
-          type="selection"
-          v-if="type.multi && data && data.length"
-          width="55"
-        >
-        </el-table-column>
-        <!--左侧序号等列-->
 
         <!--表格内容-->
-        <template v-if="data && data.length">
+        <template v-if="data">
           <tree-grid-column
             :align="align"
             :column="column"
@@ -92,15 +95,15 @@
             :width="operationWidth"
             fixed="right"
             label="操作"
-            v-if="type.operationColumn && data && data.length"
+            v-if="type.operationColumn && data"
           >
             <template slot-scope="scope">
-              <el-button size="small" type="primary" v-if="editBtn" @click="editEvent(scope.row)">编辑</el-button>
-              <el-button size="small" :type="scope.row[fieldData.field] == Object.keys(fieldData.text)[0]? 'success':'danger' " v-if="fieldBtn && Object.keys(fieldData).length !== 0" @click="fieldEvent(scope.row)">
+              <el-button size="mini" type="primary" v-if="editBtn  && checkAuth(This,editPath)" @click="editEvent(scope.row)">编辑</el-button>
+              <el-button size="mini" :type="scope.row[fieldData.field] == Object.keys(fieldData.text)[0]? 'success':'danger' " v-if="fieldBtn && Object.keys(fieldData).length !== 0 && checkAuth(This,fieldPath)" @click="fieldEvent(scope.row)">
                 {{ fieldData.text[scope.row[fieldData.field]] }}
               </el-button>
               <slot :index="scope.$index" :row="scope.row" :scope="scope" name="operation_slot"></slot>
-              <el-button size="small" v-if="delBtn" @click="delEvent(scope.row,scope.$index)">删除</el-button>
+              <el-button size="mini" v-if="delBtn && checkAuth(This,delPath)" @click="delEvent(scope.row,scope.$index)">删除</el-button>
             </template>
           </el-table-column>
         </template>
@@ -113,6 +116,22 @@
       :current-page="info.pageNum"
       :page-size="info.pageSize"
       :page-sizes="[2,10,20,50,100]"
+      :page-count="info.pageCount"
+      @current-change="currentChange"
+      @size-change="sizeChange"
+      class="pagination"
+      layout="total, sizes, prev, pager, next, jumper"
+      next-text="下一页"
+      prev-text="上一页"
+      ref="pagination"
+      v-if="type.pagination && typeof (info.pageCount) !== 'undefined'"
+    >
+    </el-pagination>
+
+    <el-pagination
+      :current-page="info.pageNum"
+      :page-size="info.pageSize"
+      :page-sizes="[2,10,20,50,100]"
       :total="info.total"
       @current-change="currentChange"
       @size-change="sizeChange"
@@ -121,10 +140,9 @@
       next-text="下一页"
       prev-text="上一页"
       ref="pagination"
-      v-if="type.pagination"
+      v-if="type.pagination && typeof (info.total) !== 'undefined'"
     >
     </el-pagination>
-
   </div>
 </template>
 <script>
@@ -276,6 +294,7 @@ export default {
       type: Object,
       default() {
         return {
+          index: true,
           pagination: true,
           multi: false,
           single: false,
@@ -403,7 +422,10 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      This: this,
+      multipleSelection: []
+    }
   },
   computed: {
     //  格式化数据源
@@ -448,6 +470,7 @@ export default {
     },
     //   表格选项发生改变（用于多选）
     handleSelectionChange(val) {
+      this.multipleSelection = val
       this.$emit('multipleSelection', val)
     },
     //  表格头标题点击
@@ -476,36 +499,51 @@ export default {
       console.log('edit')
       //         console.log(`当前页: ${val}`)
       console.log(param)
-      this.$emit('editEvent', param)
+      const _this = this
+      if (typeof (_this.$parent.editEvent) == 'function') {
+        _this.$parent.editEvent(param)
+      } else {
+        _this.$parent.editVisible = true
+        _this.$nextTick(() => {
+          _this.$parent.$refs.edit_drawer.title = '编辑' + this.$parent.title
+          _this.$parent.$refs.edit_drawer.initDrawer(param)
+        })
+      }
     },
     // 删除事件
     delEvent(param, index) {
       console.log('del')
-      this.loading = true
-      if (this.$listeners['delEvent']) {
-        this.$emit('delEvent', param)
-      } else {
-        const _this = this
-        request.post(this.delPath, { id: param.id }).then(res => {
-          // eslint-disable-next-line eqeqeq
-          if (res.code === 0) {
-            _this.$message.success('删除成功')
-            _this.dataSource.splice(index, 1)
-            // 渲染当前页 TODO
-          } else {
-            _this.$message.error('删除失败')
-          }
-        })
-      }
+      console.log(this.$parent.search)
+      const _this = this
+      _this.$confirm('确认删除该条记录吗？', '删除确认', {
+        type: "warning"
+      }).then(() => {
+        _this.$parent.loading = true
+        if (typeof (_this.$parent.delEvent) == 'function') {
+          _this.$parent.delEvent(param)
+        } else {
+          request.post(this.delPath, { id: param.id }).then(res => {
+            _this.$parent.loading = false
+            // eslint-disable-next-line eqeqeq
+            if (res.code === 0) {
+              _this.$message.success('删除成功')
+              _this.dataSource.splice(index, 1)
+              // 渲染当前页 TODO
+            } else {
+              _this.$message.error('删除失败')
+            }
+          })
+        }
+      }).catch( res => {})
     },
     // 单个字段修改事件
     fieldEvent(param) {
       console.log('fieldEvent')
+      const _this = this
       //         console.log(`当前页: ${val}`)
-      if (this.$listeners['fieldEvent']) {
-        this.$emit('fieldEvent', param)
+      if (typeof (_this.$parent.fieldEvent) == 'function') {
+        _this.$parent.fieldEvent(param)
       } else {
-        const _this = this
         const other_value = param[_this.fieldData.field]
         let value = ''
         try {
@@ -535,16 +573,22 @@ export default {
     //  开关控件改变
     switchEvent(param) {
       console.log('switchEvent')
-      //         console.log(`当前页: ${val}`)
-      if (this.$listeners['switchEvent']) {
-        this.$emit('switchEvent', param)
+      const _this = this
+      if (typeof (_this.$parent.switchEvent) == 'function') {
+        this.$parent.switchEvent(param)
       } else {
-        const _this = this
-        request.post(this.switchPath, { id: param.row.id, field: param.field, value: param.val }).then(res => {
+        request.post(this.switchPath, { id: param.row.id, field: param.column.fieldName, value: param.val }).then(res => {
           // eslint-disable-next-line eqeqeq
           if (res.code === 0) {
             _this.$message.success('操作成功')
           } else {
+            if (typeof (param.column.switchData) === 'undefined'){
+              console.log(1)
+              param.row[param.column.fieldName] = param.val === 0 ? 1 : 0
+            } else {
+              console.log(2)
+              param.row[param.column.fieldName] = param.val === param.column.switchData.on ? param.column.switchData.off : param.column.switchData.on
+            }
             _this.$message.error('操作失败')
           }
         })

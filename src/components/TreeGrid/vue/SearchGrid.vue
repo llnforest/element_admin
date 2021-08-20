@@ -24,13 +24,17 @@
             range-separator="至"
             start-placeholder="开始时间"
             end-placeholder="结束时间"
+            value-format="yyyy-MM-dd HH:mm:ss"
             align="right">
           </el-date-picker>
         </el-form-item>
       </template>
-      <el-button size="small" type="primary" @click="searchEvent">搜索</el-button>
-      <el-button size="small" type="danger">导出</el-button>
-      <el-button size="small" type="success">添加</el-button>
+      <el-form-item>
+        <el-button size="small" type="primary" @click="searchEvent" v-if="searchBtn">搜索</el-button>
+        <el-button size="small" type="danger" @click="exportEvent" v-if="exportBtn && checkAuth(this,'table/export')">导出</el-button>
+        <el-button size="small" type="success" @click="addEvent" v-if="addBtn && checkAuth(this,'table/add')">添加</el-button>
+        <slot name="btn_area"></slot>
+      </el-form-item>
     </el-form>
 
   </div>
@@ -65,6 +69,37 @@ export default {
         }
       }
     },
+    addBtn: {
+      type: Boolean,
+      default() {
+        return true
+      }
+    },
+    addPath: {
+      type: String,
+      default() {
+        const pathArr = this.$route.path.split('/')
+        return pathArr[pathArr.length - 2] + '/add'
+      }
+    },
+    exportBtn: {
+      type: Boolean,
+      default() {
+        return false
+      }
+    },
+    searchBtn: {
+      type: Boolean,
+      default() {
+        let _default = false
+        this.columns.forEach((item, index) => {
+          if (typeof (item.search) !== 'undefined') {
+            _default = true
+          }
+        })
+        return _default
+      }
+    }
   },
   data() {
     return {
@@ -93,14 +128,37 @@ export default {
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
             picker.$emit('pick', [start, end])
           }
+        }, {
+          text: '最近一年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+            picker.$emit('pick', [start, end])
+          }
         }]
-      },
-
+      }
     }
   },
   methods: {
     searchEvent() {
+      this.$parent.tableInfo.pageNum = 1
       this.$parent.renderData()
+    },
+    exportEvent() {
+      if (typeof (this.$parent.exportEvent) === 'undefined') {
+        this.$parent.exportEvent()
+      } else {
+        // TODO
+        this.$router.push({ path: 'output' })
+      }
+    },
+    addEvent() {
+      this.$parent.addVisible = true
+      this.$nextTick(() => {
+        this.$parent.$refs.add_drawer.title = '新增' + this.$parent.title
+        this.$parent.$refs.add_drawer.initDrawer()
+      })
     }
   }
 

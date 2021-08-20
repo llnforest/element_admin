@@ -28,13 +28,17 @@ function filterAsyncRouter(asyncRouterMap) {
 
 const state = {
   routes: [],
-  addRoutes: []
+  addRoutes: [],
+  auth: {}
 }
 
 const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
+  },
+  SET_AUTH: (state, auth) => {
+    state.auth = auth
   }
 }
 
@@ -43,7 +47,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       getMenuList().then(response => {
         let { data } = response
-        console.log(data)
         data = [
           {
             path: '/',
@@ -54,26 +57,50 @@ const actions = {
               name: 'dashboard/index',
               component: 'dashboard/index',
               meta: { title: '控制台', icon: 'dashboard', affix: true }
-            }]
+            }],
+            hidden: false
           },
-
+          {
+            path: '/auth',
+            component: 'Layout',
+            redirect: 'auth',
+            meta: { title: '权限管理', icon: 'auth' },
+            children: [{
+              path: 'menu/index',
+              name: 'menu/index',
+              component: 'menu/index',
+              meta: { title: '菜单管理', icon: 'menu', affix: true }
+            },
+              {
+                path: 'table/index',
+                name: 'table/index',
+                component: 'table/index',
+                meta: { title: '表格', icon: 'table' },
+                hidden: false
+              },
+            ],
+            hidden: false
+          },
           {
             path: '/table',
             component: 'Layout',
             redirect: '/table/index',
             meta: { title: '案例', icon: 'el-icon-s-help' },
+            hidden: false,
             children: [
               {
                 path: 'table/index',
                 name: 'table/index',
                 component: 'table/index',
-                meta: { title: '表格', icon: 'table' }
+                meta: { title: '表格', icon: 'table' },
+                hidden: false
               },
               {
                 path: 'tree/index',
                 name: 'tree/index',
                 component: 'tree/index',
-                meta: { title: '树形', icon: 'tree' }
+                meta: { title: '树形', icon: 'tree' },
+                hidden: false
               }
             ]
           },
@@ -164,8 +191,9 @@ const actions = {
           { path: '*', redirect: '/404', hidden: true }
 
         ]
-        data = response.data
+        data = response.data.menuList
         commit('SET_ROUTES', filterAsyncRouter(data))
+        commit('SET_AUTH', response.data.operateMenu)
         resolve(data)
       }).catch(error => {
         reject(error)

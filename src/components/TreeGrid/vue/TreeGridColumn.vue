@@ -55,7 +55,7 @@
         :inactive-value="column.switchData ? column.switchData.off : 0"
         :active-color="theme"
         :disabled="column.switchDisable"
-        @change="switchEvent($event,scope.row,column.fieldName)"
+        @change="switchEvent($event,scope.row,column)"
       >
       </el-switch>
 
@@ -125,10 +125,9 @@ export default {
     }
   },
   methods: {
-    //  分页当前页变化
-    switchEvent(val, row, field) {
-      //        console.log(`当前页: ${val}`);
-      this.$emit('switchEvent', { val, row, field })
+    //  switch 按钮切换
+    switchEvent(val, row, column) {
+      this.$emit('switchEvent', { val, row, column })
     }
 
   }

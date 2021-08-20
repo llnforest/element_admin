@@ -1,4 +1,12 @@
-import request from '@/utils/request';
+import request from '@/utils/request'
+export function checkAuth(_this, path) {
+  return true
+  if (_this.$store.state.permission.auth.indexOf(path) === -1) {
+    return false
+  } else {
+    return true
+  }
+}
 
 export function renderHeader(_this) {
   let headerPath = ''
@@ -7,12 +15,12 @@ export function renderHeader(_this) {
   } else {
     const pathArr = _this.$route.path.split('/')
     console.log(pathArr)
-
     headerPath = pathArr[pathArr.length - 2] + '/header'
   }
   request.post(headerPath, {}).then(res => {
     // eslint-disable-next-line eqeqeq
     if (res.code === 0) {
+
       _this.tableHeader = [
         { titleName: '学员姓名', fieldName: 'name', search: 'input' },
         { titleName: '年龄', fieldName: 'age', tag: true },
@@ -30,12 +38,14 @@ export function renderHeader(_this) {
   })
 }
 
-export function renderData(_this) {
+export function renderPage(_this) {
   console.log(_this.search)
   console.log(_this.tableInfo)
-  const searchData = _this.search
-  searchData.page_num = _this.tableInfo.pageNum
-  searchData.page_size = _this.tableInfo.pageSize
+
+  // const searchData = _this.search
+  // searchData.page_num = _this.tableInfo.pageNum
+  // searchData.page_size = _this.tableInfo.pageSize
+  Object.assign(_this.search, _this.tableInfo)
   let listPath = ''
   if (typeof (_this.listPath) !== 'undefined') {
     listPath = _this.indexPath
@@ -45,15 +55,25 @@ export function renderData(_this) {
 
     listPath = pathArr[pathArr.length - 2] + '/list'
   }
-  request.post(listPath, searchData).then(res => {
+  _this.loading = true
+  request.post(listPath, _this.search).then(res => {
+    _this.loading = false
     // eslint-disable-next-line eqeqeq
     if (res.code === 0) {
-      _this.tableData = [
-        { 'id': 1, 'name': '邱缘', sex: 0, 'age': 'good', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 1, 'create_time': '2021-04-2 11:10:01' },
-        { 'id': 1, 'name': '邱缘', sex: 0, 'age': 'bad', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 0, 'create_time': '2021-04-2 11:10:01' },
-        { 'id': 1, 'name': '邱缘', sex: 1, 'age': 'good', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 1, 'create_time': '2021-04-2 11:10:01' }
-
-      ]
+      _this.tableData = res.data.list
+      if (typeof (res.data.total) === 'undefined') {
+        _this.tableInfo.pageCount = res.data.pageCount
+        console.log(_this.tableInfo.pageCount)
+      } else {
+        _this.tableInfo.total = res.data.total
+      }
+      _this.tableData = res.data.list
+      // _this.tableData = [
+      //   { 'id': 1, 'name': '邱缘', sex: 0, 'age': 'good', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 1, 'create_time': '2021-04-2 11:10:01' },
+      //   { 'id': 1, 'name': '邱缘', sex: 0, 'age': 'bad', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 0, 'create_time': '2021-04-2 11:10:01' },
+      //   { 'id': 1, 'name': '邱缘', sex: 1, 'age': 'good', 'phone': '13987321031', 'id_code': '342425198929112001', 'school_name': '嘻哈驾校', 'school_address': '合肥市蜀山区创新大道100号', 'status': 1, 'create_time': '2021-04-2 11:10:01' }
+      //
+      // ]
     } else {
       _this.$message.error('网络异常')
     }
