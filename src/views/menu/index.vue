@@ -59,7 +59,7 @@ export default {
         { titleName: '菜单路由', fieldName: 'menu_url', width: '200px' },
         { titleName: '备注', fieldName: 'remark', width: '500px' },
         { titleName: '状态', fieldName: 'status', switch: true, fixed: true },
-        { titleName: '创建时间', fieldName: 'create_time', width: '160px' }
+        { titleName: '创建时间', fieldName: 'create_at', width: '160px' }
       ],
       title: '菜单'
     }
