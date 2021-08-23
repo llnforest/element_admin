@@ -17,6 +17,7 @@
 <script>
 
 import AddOrEdit from '@/components/TreeGrid/vue/AddOrEdit'
+import request from "@/utils/request";
 
 export default {
   name: 'AddDrawer',
@@ -29,8 +30,43 @@ export default {
       rule: [
         {
           type: 'input',
-          field: 'goods_name',
-          title: '商品名称',
+          field: 'nickname',
+          title: '人员昵称',
+          value: '',
+          on: {
+            'on-change': function(){
+              console.log('value 发生变化')
+            }
+          },
+          validate: [
+            {
+              'trigger': 'blur',
+              'mode': 'required',
+              'message': '',
+              'required': true,
+              'type': 'string'
+            }
+          ]
+        },
+        {
+          type: 'input',
+          field: 'phone',
+          title: '手机号码',
+          value: '',
+          validate: [
+            {
+              'trigger': 'blur',
+              'mode': 'required',
+              'message': '',
+              'required': true,
+              'type': 'number'
+            }
+          ]
+        },
+        {
+          type: 'input',
+          field: 'username',
+          title: '登录账号',
           value: '',
           validate: [
             {
@@ -43,24 +79,95 @@ export default {
           ]
         },
         {
+          type: 'input',
+          field: 'password',
+          title: '登录密码',
+          value: '',
+          validate: [
+            {
+              'trigger': 'blur',
+              'mode': 'required',
+              'message': '',
+              'required': true,
+              'type': 'string'
+            }
+          ]
+        },
+        {
+          type: 'select',
+          field: 'school_id',
+          title: '选择驾校',
+          value: '',
+          on: {
+            'change': this.schoolIdChange
+          },
+          props: {
+            filterable: true,
+            remote: true,
+            remoteMethod: this.remoteMethod
+          },
+          options: [
+          ],
+          validate: [
+            {
+              trigger: 'change',
+              mode: 'required',
+              message: '',
+              required: true,
+              type: 'number'
+            }
+          ]
+        },
+        {
           type: 'checkbox',
           field: 'label',
-          title: '标签',
+          title: '所属权限',
           value: [],
           options: [
-            { label: '好用', value: 0 },
-            { label: '快速', value: 1 },
-            { label: '高效', value: 2 },
-            { label: '全能', value: 3 },
           ]
         },
       ]
     }
   },
+  created() {
+    // this.renderData()
+  },
   methods: {
+    schoolIdChange(val) {
+      const _this = this
+      request.post('index/getRoleListByLabel', { keywords: val }).then(res => {
+        if (res.code === 0) {
+          // 渲染当前页
+          _this.rule[5].options = res.data
+        }
+      })
+    },
+    remoteMethod(val) {
+      const _this = this
+      request.post('index/getSchoolListByLabel', { keywords: val }).then(res => {
+        if (res.code === 0) {
+          // 渲染当前页
+          _this.rule[4].options = res.data
+        }
+      })
+    },
+    renderData() {
+      const _this = this
+      console.log(_this.$refs.add_or_edit)
+      _this.$refs.add_or_edit.fApi.on('school_id-on-change', (val) => {
+        console.log(val)
+      })
+    },
     initDrawer() {
-      this.$nextTick(() => {
-        this.$refs.add_or_edit.init()
+      const _this = this
+      _this.$nextTick(() => {
+        _this.$refs.add_or_edit.init()
+        // console.log(this.$refs.add_or_edit)
+        // console.log(this.$refs.add_or_edit._data.fApi)
+        // this.renderData()
+        // _this.$refs.add_or_edit.fApi.on('school_id-on-change', (val) => {
+        //   console.log(val)
+        // })
       })
     },
     refreshList(item) {

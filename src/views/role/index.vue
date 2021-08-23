@@ -49,7 +49,7 @@ export default {
       search: {},
       type: { index: false, pagination: true, operationColumn: true, multi: false },
       operationWidth: 160,
-      tableInfo: { pageNum: 1, pageSize: 10, pageCount: 0 },
+      tableInfo: { pageNum: 1, pageSize: 10, total: 0 },
       tableData: [],
       tableHeader: [
         { titleName: 'ID', fieldName: 'id', width: '70px' },
